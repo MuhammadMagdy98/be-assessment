@@ -2,6 +2,10 @@ const Check = require("../models/check");
 const User = require("../models/user");
 const Report = require("../models/report");
 const makeRequest = require("../utils/makeRequest");
+const validator = require("validator");
+
+const tenMinutesInMilliseconds = 1000 * 60 * 10;
+
 const addCheck = async (req, res) => {
   const { name, url, protocol, interval } = req.body;
   if (!name || !url) {
@@ -21,8 +25,7 @@ const addCheck = async (req, res) => {
         return;
       }
     }
-    const tenMinutesInMilliseconds = 1000 * 60 * 10;
-    
+
     const check = new Check({
       name: name,
       url: url,
@@ -30,9 +33,11 @@ const addCheck = async (req, res) => {
       interval: interval ? interval * 1000 : tenMinutesInMilliseconds,
     });
 
-    await check.save();
+    
     console.log(check);
-    makeRequest(check);
+    const intervalId = makeRequest(check);
+    check.intervalId = intervalId;
+    await check.save();
 
     res.status(200).json({ message: "Check is done", success: true });
   } catch (err) {
@@ -42,10 +47,16 @@ const addCheck = async (req, res) => {
 
 const removeCheck = async (req, res) => {
   const { name } = req.body;
+  if (!name) {
+    res.status(400).json({ message: "name is required", success: false });
+    return;
+  }
   try {
-    const checkId = await Check.findOne({name});
+    const check = await Check.findOne({ name });
+    console.log("removed");
+    clearInterval(check.intervalId);
     await Check.deleteOne({ name });
-    await Report.deleteOne({checkId});
+    await Report.deleteOne({ checkId: check._id });
     res
       .status(201)
       .json({ message: "Check is removed successfully", success: true });
@@ -54,10 +65,59 @@ const removeCheck = async (req, res) => {
   }
 };
 
-const getCheck = async (req, res) => {};
+const getCheck = async (req, res) => {
+  const { name } = req.query;
+  if (!name) {
+    res.status(400).json({ message: "name is required", success: false });
+    return;
+  }
+  try {
+    const check = await Check.findOne({ name });
+    res.status(200).json({ check, success: true });
+  } catch (err) {
+    res
+      .status(400)
+      .json({ message: "this name doesn't exist", success: false });
+  }
+};
 
-const updateCheck = async (req, res) => {};
+const updateCheck = async (req, res) => {
+  const { previousName, newName, url, interval, protocol } = req.body;
+  if (!previousName || !newName || !url) {
+    res.status(400).json({
+      message: "Please enter previous name, new name, url and interval",
+      success: false,
+    });
+    return;
+  }
+  if (interval && !validator.isInt(interval)) {
+    res
+      .status(400)
+      .json({ message: "interval should be a number", success: false });
+    return;
+  }
+  try {
+    const checkId = await Check.findOne({ previousName });
+    await Check.deleteOne({ previousName });
+    await Report.deleteOne({ checkId });
+    const updatedCheck = new Check({
+      url,
+      name: newName,
+      interval: interval ? interval * 1000 : tenMinutesInMilliseconds,
+      userId: req.user._id,
+    });
+    await updateCheck.save();
+
+    res
+      .status(201)
+      .json({ message: "Check is updated successfully", success: true });
+  } catch (err) {
+    res.status(400).json({ message: "Something went wrong", success: false });
+  }
+};
 module.exports = {
   addCheck,
-  removeCheck
-}
+  removeCheck,
+  updateCheck,
+  getCheck,
+};

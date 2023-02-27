@@ -18,6 +18,9 @@ const checkSchema = mongoose.Schema({
   },
   interval: {
     type: Number
+  },
+  intervalId: {
+    type: Number
   }
   
 });
