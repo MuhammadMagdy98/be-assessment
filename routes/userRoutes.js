@@ -17,9 +17,9 @@ router.get("/verify/:token", verifySignup);
 
 router.post("/check/add", authenticate, addCheck);
 
-router.post("/check/remove", authenticate, removeCheck);
+router.delete("/check/remove", authenticate, removeCheck);
 
-router.post("/check/update", authenticate, updateCheck);
+router.put("/check/update", authenticate, updateCheck);
 
 router.get("/check/get", authenticate, getCheck);
 
