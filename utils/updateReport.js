@@ -1,4 +1,6 @@
 const Report = require("../models/report");
+const User = require("../models/user");
+const notificationFactory = require("./NotificationFactory");
 const updateReport = async ({ status, responseTime, check }) => {
   try {
     let report = await Report.findOne({ checkId: check._id });
@@ -21,6 +23,18 @@ const updateReport = async ({ status, responseTime, check }) => {
     }
 
     report.checkCount++;
+    if (report.status !== status) {
+      // it was up then down or vice versa we have to send notification to email
+      const user = await User.findOne({_id: check.userId});
+
+      const emailNotification = new notificationFactory().createNotification("email", {
+        receiverEmail: email,
+        subject: `${check.url} is ${status}`,
+        html: `<p style="color:${status === "up" ? "green" : "red"}> ${check.url} is $status} </p>`,
+      });
+      emailNotification.send();
+
+    }
     report.status = status;
     report.responseTimeSum += responseTime;
     report.outages += (status === "down" ? 1 : 0);
