@@ -85,29 +85,35 @@ const updateCheck = async (req, res) => {
     });
     return;
   }
-  if (interval && !validator.isInt(interval)) {
+  if (interval && !validator.isInt(interval.toString())) {
     res
       .status(400)
       .json({ message: "interval should be a number", success: false });
     return;
   }
   try {
-    const checkId = await Check.findOne({ previousName });
-    await Check.deleteOne({ previousName });
-    await Report.deleteOne({ checkId });
-    const updatedCheck = new Check({
-      url,
-      name: newName,
-      protocol,
-      interval: interval ? interval * 1000 : tenMinutesInMilliseconds,
-      userId: req.user._id,
-    });
-    await updateCheck.save();
+    const check = await Check.findOne({ name: previousName });
+    if (!check) {
+      res.status(400).json({ message: "no check with previousName", success: false });
+      return;
+    }
+    check.name = newName;
+    check.url = url;
+    check.interval = interval ? interval * 1000 : tenMinutesInMilliseconds;
+    check.protocol = protocol;
+    check.userId = req.user._id;
+    await Report.deleteOne({ checkId: check._id });
+    clearInterval(check.intervalId);
+    
+    const intervalId = makeRequest(check);
+    check.intervalId = intervalId;
+    await check.save();
 
     res
       .status(201)
       .json({ message: "Check is updated successfully", success: true });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ message: "Something went wrong", success: false });
   }
 };
