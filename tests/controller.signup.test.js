@@ -1,7 +1,6 @@
 const axios = require("axios");
 
 describe("sign up test", () => {
-
   test("invalid email", async () => {
     try {
       await axios.post("http://localhost:3000/signup", {
@@ -22,7 +21,9 @@ describe("sign up test", () => {
       });
     } catch (err) {
       expect(err.response.status).toBe(400);
-      expect(err.response.data.message).toBe("Password should be at least 8 characters");
+      expect(err.response.data.message).toBe(
+        "Password should be at least 8 characters"
+      );
       expect(err.response.data.success).toBe(false);
     }
   });
@@ -34,8 +35,24 @@ describe("sign up test", () => {
       });
     } catch (err) {
       expect(err.response.status).toBe(400);
-      expect(err.response.data.message).toBe("Please enter an email and password");
+      expect(err.response.data.message).toBe(
+        "Please enter an email and password"
+      );
       expect(err.response.data.success).toBe(false);
+    }
+  });
+  test("register with correct email and password", async () => {
+    try {
+      await axios.post("http://localhost:3000/signup", {
+        email: "migo101@gmail.com",
+        password: "asdasdasd123",
+      });
+    } catch (err) {
+      expect(err.response.status).toBe(201);
+      expect(err.response.data.message).toBe(
+        "user is created successfully, please verify your email to complete the sign up"
+      );
+      expect(err.response.data.success).toBe(true);
     }
   });
 });
