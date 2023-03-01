@@ -6,6 +6,8 @@ const verifySignup = require("../controllers/verifySignup");
 const authenticate = require("../middlewares/auth");
 const {addCheck, removeCheck, updateCheck, getCheck} = require("../controllers/checks");
 const getReport = require("../controllers/reports");
+const validateCheck = require("../middlewares/validateCheck");
+const validateUpdateCheck = require("../middlewares/validateUpdateCheck");
 
 const router = Router();
 
@@ -15,11 +17,11 @@ router.post("/login", login);
 
 router.get("/verify/:token", verifySignup);
 
-router.post("/check/add", authenticate, addCheck);
+router.post("/check/add", authenticate, validateCheck, addCheck);
 
 router.delete("/check/remove", authenticate, removeCheck);
 
-router.put("/check/update", authenticate, updateCheck);
+router.put("/check/update", authenticate, validateUpdateCheck, updateCheck);
 
 router.get("/check/get", authenticate, getCheck);
 

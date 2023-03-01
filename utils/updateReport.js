@@ -38,7 +38,8 @@ const updateReport = async ({ status, responseTime, check }) => {
     report.status = status;
     report.responseTimeSum += responseTime;
     report.outages += (status === "down" ? 1 : 0);
-    await report.save();
+    report.upTime += (status === "up" ? 10 * 60: 0);
+    report.downTime += (status === "down" ? 10 * 60 : 0);
     const upTimeCount = report.checkCount - report.outages;
     report.availability = Math.round((upTimeCount / report.checkCount) * 100);
     report.responseTime = Math.round(report.responseTimeSum / report.checkCount);

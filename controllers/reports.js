@@ -8,7 +8,9 @@ const getReport = async (req, res) => {
   }
   try {
     const check = await Check.findOne({ name, userId: req.user._id });
+    console.log(check);
     const report = await Report.findOne({ checkId: check._id });
+    console.log(report);
     res.status(200).json({report, success: true});
   } catch (err) {
     res.status(400).json({message: "report not found", success: false});

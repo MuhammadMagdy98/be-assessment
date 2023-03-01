@@ -31,7 +31,7 @@ const makeRequest = (check) => {
     let response;
     try {
       // we need to use var to access the variable in the catch
-      response = await instance({ url: check.url, method: "get" });
+      response = await instance({ url: check.url, method: "get", timeout: check.timeout });
       console.log("fetching ", check.url);
 
       if (response.status >= 200 && response.status < 300) {

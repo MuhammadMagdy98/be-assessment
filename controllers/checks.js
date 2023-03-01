@@ -8,12 +8,6 @@ const tenMinutesInMilliseconds = 1000 * 60 * 10;
 
 const addCheck = async (req, res) => {
   const { name, url, protocol, interval } = req.body;
-  if (!name || !url) {
-    res
-      .status(400)
-      .json({ message: "Please enter valid name and url", success: false });
-    return;
-  }
   try {
     const urlExists = await Check.findOne({ url });
     if (urlExists) {
@@ -29,6 +23,7 @@ const addCheck = async (req, res) => {
     const check = new Check({
       name: name,
       url: url,
+      protocol: protocol.toUpperCase(),
       userId: req.user._id,
       interval: interval ? interval * 1000 : tenMinutesInMilliseconds,
     });
@@ -103,6 +98,7 @@ const updateCheck = async (req, res) => {
     const updatedCheck = new Check({
       url,
       name: newName,
+      protocol,
       interval: interval ? interval * 1000 : tenMinutesInMilliseconds,
       userId: req.user._id,
     });
