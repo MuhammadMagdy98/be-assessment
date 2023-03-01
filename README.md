@@ -2,6 +2,25 @@
 
 Build an uptime monitoring RESTful API server that allows authenticated users to monitor URLs, and get detailed uptime reports about their availability, average response time, and total uptime/downtime.
 
+
+
+## Usage
+- Open your terminal in the current directory 
+- type `npm install` to insall all dependencies
+- type `node server.js` to run the server
+- type `npm test` to run the unit tests
+- Change the .env to fit your settings
+
+
+## API endpoints 
+- post ``http://localhost:3000/signup`` required {"email", "password"}
+- post ``http://localhost:3000/login`` required {"email", "password"}
+- post ``http://localhost:3000/check/add`` required {"name", "url", "protocol", "token"}
+- delete ``http://localhost:3000/check/remove`` required {"name", "token"}
+- put  ``http://localhost:3000/check/update`` required {"previousName", "newName", "url", "protocol", "token" }
+- get ``http://localhost:3000/check/get`` required query parameters {"name" "token"}
+- get ``http://localhost:3000/report`` required query parameters {"name", "token"}
+
 ## Overview
 
 - Signup with email verification.
